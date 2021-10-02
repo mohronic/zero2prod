@@ -7,7 +7,7 @@ if ! [ -x "$(command -v psql)" ]; then
     exit 1
 fi
 
-if ! [ -x "$(command -v cargo sqlx)" ]; then
+if ! [ -x "$(command -v sqlx)" ]; then
     echo >$2 "Error: 'sqlx' is not installed."
     exit 1
 fi
