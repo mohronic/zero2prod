@@ -3,7 +3,7 @@ use std::convert::TryInto;
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub application_port: u16,
-    pub database: DatabaseSettings
+    pub database: DatabaseSettings,
 }
 
 #[derive(serde::Deserialize)]
@@ -12,12 +12,15 @@ pub struct DatabaseSettings {
     pub password: String,
     pub port: u16,
     pub host: String,
-    pub database_name: String
+    pub database_name: String,
 }
 
 impl DatabaseSettings {
     pub fn connection_string(&self) -> String {
-        format!("postgres://{}:{}@{}:{}/{}", self.username, self.password, self.host, self.port, self.database_name)
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+            self.username, self.password, self.host, self.port, self.database_name
+        )
     }
 }
 
