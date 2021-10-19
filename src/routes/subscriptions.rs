@@ -4,15 +4,35 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 #[derive(serde::Deserialize)]
-pub struct SubscripeData {
+pub struct SubscribeData {
     name: String,
     email: String,
 }
 
-pub async fn subscripe(form: web::Form<SubscripeData>, pool: web::Data<PgPool>) -> impl Responder {
-    match sqlx::query!(
+#[tracing::instrument(
+    name = "Adding a new subscriber", 
+    skip(form, pool), 
+    fields(
+        subscriber_email = %form.email, 
+        subscriber_name = %form.name
+    )
+)]
+pub async fn subscribe(form: web::Form<SubscribeData>, pool: web::Data<PgPool>) -> impl Responder {
+    match insert_subscriber(&pool, &form).await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(_) => HttpResponse::InternalServerError().finish()
+    }
+}
+
+#[tracing::instrument(
+    name = "Saving new subscriber details in the database", 
+    skip(form, pool)
+)]
+pub async fn insert_subscriber(pool: &PgPool, form: &SubscribeData) -> Result<(), sqlx::Error> {
+    sqlx::query!(
         r#"
-            INSERT INTO subscriptions (id, email, name, subscriped_at)
+            INSERT INTO subscriptions (id, email, name, subscribed_at)
             VALUES ($1, $2, $3, $4)
         "#,
         Uuid::new_v4(),
@@ -20,13 +40,11 @@ pub async fn subscripe(form: web::Form<SubscripeData>, pool: web::Data<PgPool>) 
         form.name,
         Utc::now()
     )
-    .execute(pool.get_ref())
+    .execute(pool)
     .await
-    {
-        Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => {
-            println!("Failed to execute query: {}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+    .map_err(|e| {
+        tracing::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
+    Ok(())
 }
