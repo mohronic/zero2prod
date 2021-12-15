@@ -15,4 +15,11 @@ services:
     instance_count: 1
     instance_size_slug: basic-xxs
     routes:
-      - path: /   
+      - path: /
+
+databases:
+  - engine: PG
+    name: newsletter
+    num_nodes: 1
+    size: db-s-dev-database
+    version: "12"
