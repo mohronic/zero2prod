@@ -17,9 +17,9 @@ services:
     routes:
       - path: /
 
-databases:
-  - engine: PG
-    name: newsletter
-    num_nodes: 1
-    size: db-s-dev-database
-    version: "12"
+# databases:
+#   - engine: PG
+#     name: newsletter
+#     num_nodes: 1
+#     size: db-s-dev-database
+#     version: "12"
