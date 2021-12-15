@@ -17,6 +17,7 @@ pub struct SubscribeData {
         subscriber_name = %form.name
     )
 )]
+#[allow(clippy::async_yields_async)] //necessary due to tracing instrumentation
 pub async fn subscribe(form: web::Form<SubscribeData>, pool: web::Data<PgPool>) -> impl Responder {
     match insert_subscriber(&pool, &form).await {
         Ok(_) => HttpResponse::Ok().finish(),
