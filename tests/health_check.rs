@@ -25,7 +25,7 @@ pub struct TestApp {
     pub db_pool: PgPool,
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn health_check_works() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -40,7 +40,7 @@ async fn health_check_works() {
     assert_eq!(Some(0), response.content_length());
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscripe_returns_200_for_valid_form_data() {
     let app = spawn_app().await;
 
@@ -66,7 +66,7 @@ async fn subscripe_returns_200_for_valid_form_data() {
     assert_eq!(saved.name, "john doe");
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscripe_returns_400_for_missing_data() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -94,7 +94,7 @@ async fn subscripe_returns_400_for_missing_data() {
     }
 }
 
-#[actix_rt::test]
+#[tokio::test]
 async fn subscripe_returns_400_for_invalid_data() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
