@@ -3,7 +3,7 @@ use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::{
-    configuration::{self, get_configuration, DatabaseSettings},
+    configuration::{get_configuration, DatabaseSettings},
     email_client::EmailClient,
     telemetry::{get_subscriber, init_subscriber},
 };
