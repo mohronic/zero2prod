@@ -44,6 +44,7 @@ impl EmailClient {
 }
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "PascalCase")]
 struct SendEmailRequest {
     from: String,
     to: String,
@@ -56,7 +57,7 @@ struct SendEmailRequest {
 mod tests{
     use fake::Faker;
     use secrecy::Secret;
-    use wiremock::matchers::any;
+    use wiremock::matchers::{header_exists, header, path, method};
     use wiremock::{MockServer, Mock, ResponseTemplate};
     use fake::{faker::internet::en::SafeEmail, Fake};
     use fake::faker::lorem::en::{Paragraph, Sentence};
@@ -66,12 +67,16 @@ mod tests{
     use super::EmailClient;
 
     #[tokio::test]
-    async fn send_email_fires_a_request_to_base_url() {
+    async fn send_email_sends_the_expected_request() {
         let mock_server = MockServer::start().await;
         let sender = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
         let email_client = EmailClient::new(mock_server.uri(), sender, Secret::new(Faker.fake()));
 
-        Mock::given(any())
+        Mock::given(header_exists("X-Postmark-Server-Token"))
+            .and(header("Content-Type", "application/json"))
+            .and(path("/email"))
+            .and(method("POST"))
+            .and(SendEmailBodyMatcher)
             .respond_with(ResponseTemplate::new(200))
             .expect(1)
             .mount(&mock_server)
@@ -84,5 +89,22 @@ mod tests{
         let _ = email_client
             .send_email(subscriber_email, &subject, &content, &content)
             .await;
+    }
+
+    struct SendEmailBodyMatcher;
+
+    impl wiremock::Match for SendEmailBodyMatcher {
+        fn matches(&self, request: &wiremock::Request) -> bool {
+            let result: Result<serde_json::Value, _> = serde_json::from_slice(&request.body);
+            if let Ok(body) = result {
+                body.get("From").is_some()
+                    && body.get("To").is_some()
+                    && body.get("Subject").is_some()
+                    && body.get("HtmlBody").is_some()
+                    && body.get("TextBody").is_some()
+            } else {
+                false
+            }
+        }
     }
 }
