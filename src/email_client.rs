@@ -1,5 +1,5 @@
 use reqwest::Client;
-use secrecy::{Secret, ExposeSecret};
+use secrecy::{ExposeSecret, Secret};
 
 use crate::domain::SubscriberEmail;
 
@@ -11,7 +11,11 @@ pub struct EmailClient {
 }
 
 impl EmailClient {
-    pub fn new(base_url: String, sender: SubscriberEmail, authorization_token: Secret<String>) -> Self {
+    pub fn new(
+        base_url: String,
+        sender: SubscriberEmail,
+        authorization_token: Secret<String>,
+    ) -> Self {
         Self {
             http_client: Client::new(),
             base_url,
@@ -29,38 +33,43 @@ impl EmailClient {
     ) -> Result<(), reqwest::Error> {
         let url = format!("{}/email", self.base_url);
         let request_body = SendEmailRequest {
-            from: self.sender.as_ref().to_owned(),
-            to: recipient.as_ref().to_owned(),
-            subject: subject.to_owned(),
-            html_body: html_content.to_owned(),
-            text_body: text_content.to_owned(),
+            from: self.sender.as_ref(),
+            to: recipient.as_ref(),
+            subject: subject,
+            html_body: html_content,
+            text_body: text_content,
         };
-        self.http_client.post(&url)
+        self.http_client
+            .post(&url)
             .json(&request_body)
-            .header("X-Postmark-Server-Token", self.authorization_token.expose_secret())
-            .send().await?;
+            .header(
+                "X-Postmark-Server-Token",
+                self.authorization_token.expose_secret(),
+            )
+            .send()
+            .await?;
         Ok(())
     }
 }
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "PascalCase")]
-struct SendEmailRequest {
-    from: String,
-    to: String,
-    subject: String,
-    html_body: String,
-    text_body: String,
+struct SendEmailRequest<'a> {
+    from: &'a str,
+    to: &'a str,
+    subject: &'a str,
+    html_body: &'a str,
+    text_body: &'a str,
 }
 
 #[cfg(test)]
-mod tests{
-    use fake::Faker;
-    use secrecy::Secret;
-    use wiremock::matchers::{header_exists, header, path, method};
-    use wiremock::{MockServer, Mock, ResponseTemplate};
-    use fake::{faker::internet::en::SafeEmail, Fake};
+mod tests {
     use fake::faker::lorem::en::{Paragraph, Sentence};
+    use fake::Faker;
+    use fake::{faker::internet::en::SafeEmail, Fake};
+    use secrecy::Secret;
+    use wiremock::matchers::{header, header_exists, method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     use crate::domain::SubscriberEmail;
 

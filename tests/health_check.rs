@@ -141,7 +141,7 @@ async fn spawn_app() -> TestApp {
         .sender()
         .expect("Invalid sender email");
     let email_client = EmailClient::new(
-        configuration.email_client.base_url, 
+        configuration.email_client.base_url,
         sender_email,
         configuration.email_client.authorization_token,
     );
