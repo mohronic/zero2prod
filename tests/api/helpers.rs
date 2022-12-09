@@ -3,7 +3,8 @@ use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},
-    telemetry::{get_subscriber, init_subscriber}, startup::{Application, get_connection_pool},
+    startup::{get_connection_pool, Application},
+    telemetry::{get_subscriber, init_subscriber},
 };
 
 static TRACING: Lazy<()> = Lazy::new(|| {
@@ -36,7 +37,9 @@ pub async fn spawn_app() -> TestApp {
 
     configure_database(&configuration.database).await;
 
-    let application = Application::build(configuration.clone()).await.expect("Failed to build application.");
+    let application = Application::build(configuration.clone())
+        .await
+        .expect("Failed to build application.");
     let address = format!("http://127.0.0.1:{}", application.port());
     let _ = tokio::spawn(application.run_until_stopped());
 

@@ -1,10 +1,10 @@
-use crate::configuration::{Settings, DatabaseSettings};
+use crate::configuration::{DatabaseSettings, Settings};
 use crate::email_client::EmailClient;
 use crate::routes::{health_check, subscribe};
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
-use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
@@ -16,12 +16,12 @@ pub struct Application {
 impl Application {
     pub async fn build(configuration: Settings) -> Result<Application, std::io::Error> {
         let connection_pool = get_connection_pool(&configuration.database);
-    
+
         let sender_email = configuration
             .email_client
             .sender()
             .expect("Invalid sender email");
-    
+
         let timeout = configuration.email_client.timeout();
         let email_client = EmailClient::new(
             configuration.email_client.base_url,
@@ -29,7 +29,7 @@ impl Application {
             configuration.email_client.authorization_token,
             timeout,
         );
-    
+
         let address = format!(
             "{}:{}",
             configuration.application.host, configuration.application.port
@@ -38,7 +38,7 @@ impl Application {
         let port = listener.local_addr().unwrap().port();
         let server = run(listener, connection_pool, email_client)?;
 
-        Ok(Self {port, server})
+        Ok(Self { port, server })
     }
 
     pub fn port(&self) -> u16 {
