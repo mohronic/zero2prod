@@ -4,16 +4,9 @@ use crate::helpers::spawn_app;
 async fn subscripe_returns_200_for_valid_form_data() {
     let app = spawn_app().await;
 
-    let client = reqwest::Client::new();
     let body = "name=john%20doe&email=john_doe%40gmail.com";
 
-    let respone = client
-        .post(&format!("{}/subscriptions", &app.address))
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    let respone = app.post_subscriptions(body.into()).await;
 
     assert_eq!(200, respone.status().as_u16());
 
@@ -29,7 +22,6 @@ async fn subscripe_returns_200_for_valid_form_data() {
 #[tokio::test]
 async fn subscripe_returns_400_for_missing_data() {
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
     let test_cases = vec![
         ("name=john%20doe", "missing the email"),
         ("email=john_doe%40gmail.com", "missing the name"),
@@ -37,13 +29,7 @@ async fn subscripe_returns_400_for_missing_data() {
     ];
 
     for (body, error_message) in test_cases {
-        let respone = client
-            .post(&format!("{}/subscriptions", &app.address))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(body)
-            .send()
-            .await
-            .expect("Failed to execute request.");
+        let respone = app.post_subscriptions(body.into()).await;
 
         assert_eq!(
             400,
@@ -57,7 +43,6 @@ async fn subscripe_returns_400_for_missing_data() {
 #[tokio::test]
 async fn subscripe_returns_400_for_invalid_data() {
     let app = spawn_app().await;
-    let client = reqwest::Client::new();
     let test_cases = vec![
         ("name=&email=john_doe%40gmail.com", "empty name"),
         ("name=john%20doe&email=", "empty email"),
@@ -68,13 +53,7 @@ async fn subscripe_returns_400_for_invalid_data() {
     ];
 
     for (body, error_message) in test_cases {
-        let respone = client
-            .post(&format!("{}/subscriptions", &app.address))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(body)
-            .send()
-            .await
-            .expect("Failed to execute request.");
+        let respone = app.post_subscriptions(body.into()).await;
 
         assert_eq!(
             400,
