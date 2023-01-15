@@ -52,7 +52,9 @@ pub async fn subscribe(
         return HttpResponse::InternalServerError().finish();
     }
 
-    if send_confirmation_email(&email_client, new_subscriber).await.is_err()
+    if send_confirmation_email(&email_client, new_subscriber)
+        .await
+        .is_err()
     {
         return HttpResponse::InternalServerError().finish();
     }
