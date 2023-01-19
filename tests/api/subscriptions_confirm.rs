@@ -1,5 +1,8 @@
 use reqwest::Url;
-use wiremock::{Mock, ResponseTemplate, matchers::{method, path}};
+use wiremock::{
+    matchers::{method, path},
+    Mock, ResponseTemplate,
+};
 
 use crate::helpers::spawn_app;
 
@@ -24,7 +27,7 @@ async fn the_link_returned_by_subscribe_returns_a_200_if_called() {
         .respond_with(ResponseTemplate::new(200))
         .mount(&app.email_server)
         .await;
-    
+
     app.post_subscriptions(body.into()).await;
 
     let email_request = &app.email_server.received_requests().await.unwrap()[0];
