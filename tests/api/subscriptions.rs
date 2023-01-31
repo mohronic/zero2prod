@@ -23,7 +23,7 @@ async fn subscripe_returns_200_for_valid_form_data() {
 }
 
 #[tokio::test]
-async fn subscripe_persists_the_new_subscriber() {
+async fn subscribe_persists_the_new_subscriber() {
     let app = spawn_app().await;
     let body = "name=john%20doe&email=john_doe%40gmail.com";
 
@@ -49,7 +49,7 @@ async fn subscripe_persists_the_new_subscriber() {
 }
 
 #[tokio::test]
-async fn subscripe_returns_400_for_missing_data() {
+async fn subscribe_returns_400_for_missing_data() {
     let app = spawn_app().await;
     let test_cases = vec![
         ("name=john%20doe", "missing the email"),
@@ -70,7 +70,7 @@ async fn subscripe_returns_400_for_missing_data() {
 }
 
 #[tokio::test]
-async fn subscripe_returns_400_for_invalid_data() {
+async fn subscribe_returns_400_for_invalid_data() {
     let app = spawn_app().await;
     let test_cases = vec![
         ("name=&email=john_doe%40gmail.com", "empty name"),
@@ -93,8 +93,24 @@ async fn subscripe_returns_400_for_invalid_data() {
     }
 }
 
+
 #[tokio::test]
 async fn subscribe_sends_a_confirmation_email_for_valid_data() {
+    let app = spawn_app().await;
+    let body = "name=test%20person&email=test%40email.com";
+
+    Mock::given(path("/email"))
+        .and(method("POST"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
+
+    app.post_subscriptions(body.into()).await;
+}
+
+#[tokio::test]
+async fn subscribe_sends_a_confirmation_email_with_a_link() {
     let app = spawn_app().await;
     let body = "name=test%20person&email=test%40email.com";
 
