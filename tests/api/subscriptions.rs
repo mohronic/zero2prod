@@ -93,7 +93,6 @@ async fn subscribe_returns_400_for_invalid_data() {
     }
 }
 
-
 #[tokio::test]
 async fn subscribe_sends_a_confirmation_email_for_valid_data() {
     let app = spawn_app().await;
