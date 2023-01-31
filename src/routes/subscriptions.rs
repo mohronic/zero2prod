@@ -49,7 +49,10 @@ pub async fn subscribe(
     };
 
     let subscription_token = generate_subscription_token();
-    if store_token(&pool, subscriber_id, &subscription_token).await.is_err() {
+    if store_token(&pool, subscriber_id, &subscription_token)
+        .await
+        .is_err()
+    {
         return HttpResponse::InternalServerError().finish();
     }
 
