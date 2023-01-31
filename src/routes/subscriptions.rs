@@ -54,7 +54,7 @@ pub async fn subscribe(
         return HttpResponse::InternalServerError().finish();
     }
 
-    if send_confirmation_email(&email_client, new_subscriber, &base_url.0)
+    if send_confirmation_email(&email_client, new_subscriber, &base_url.0, "mytoken")
         .await
         .is_err()
     {
@@ -99,10 +99,11 @@ pub async fn send_confirmation_email(
     email_client: &EmailClient,
     new_subscriber: NewSubscriber,
     base_url: &String,
+    subscription_token: &str,
 ) -> Result<(), reqwest::Error> {
     let confirmation_link = format!(
-        "{}/subscriptions/confirm?subscription_token=my_token",
-        base_url
+        "{}/subscriptions/confirm?subscription_token={}",
+        base_url, subscription_token,
     );
     let plain_body = format!(
         "Welcome to our newsletter!\nVisit {} to confirm you subscription",
