@@ -69,7 +69,14 @@ fn error_chain_fmt(
     Ok(())
 }
 
-#[allow(clippy::async_yields_async)] //necessary due to tracing instrumentation
+#[tracing::instrument(
+    name = "Adding a new subscriber",
+    skip(form, pool, email_client, base_url),
+    fields(
+        subscriber_email = %form.email,
+        subscriber_name = %form.name
+    )
+)]
 pub async fn subscribe(
     form: web::Form<SubscribeData>,
     pool: web::Data<PgPool>,
