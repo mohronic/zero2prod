@@ -37,11 +37,11 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
 async fn create_unconfirmed_subscriber(app: &TestApp) {
     let body = "name=john%20doe&email=john_doe%40gmail.com";
 
-    Mock::given(path("/email"))
+    let _mock_guard = Mock::given(path("/email"))
         .and(method("POST"))
         .respond_with(ResponseTemplate::new(200))
         .expect(1)
-        .mount(&app.email_server)
+        .mount_as_scoped(&app.email_server)
         .await;
 
     app.post_subscriptions(body.into())
