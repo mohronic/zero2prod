@@ -44,8 +44,7 @@ async fn create_unconfirmed_subscriber(app: &TestApp) {
         .mount(&app.email_server)
         .await;
 
-    let respone = app
-        .post_subscriptions(body.into())
+    app.post_subscriptions(body.into())
         .await
         .error_for_status()
         .unwrap();
