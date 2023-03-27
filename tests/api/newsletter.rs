@@ -90,6 +90,44 @@ async fn create_unconfirmed_subscriber(app: &TestApp) -> ConfirmationLinks {
     app.get_confirmation_links(email_request)
 }
 
+#[tokio::test]
+async fn newsletters_return_400_for_invalid_data() {
+    let app = spawn_app().await;
+    let test_cases = vec![
+        (
+            serde_json::json!({
+                "content": {
+                    "text": "Newsletter body as plain text",
+                    "html": "<p>Newsletter body as html</p>"
+                }
+            }),
+            "missing title",
+        ),
+        (
+            serde_json::json!({
+                "title": "Newsletter title"
+            }),
+            "missing content",
+        ),
+    ];
+
+    for (invalid_body, error_message) in test_cases {
+        let response = reqwest::Client::new()
+            .post(&format!("{}/newsletters", &app.address))
+            .json(&invalid_body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
+
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not fail with 400 Bad Request when payload was: {}",
+            error_message
+        );
+    }
+}
+
 async fn create_confirmed_subscriber(app: &TestApp) {
     let confirmation_links = create_unconfirmed_subscriber(app).await;
 
