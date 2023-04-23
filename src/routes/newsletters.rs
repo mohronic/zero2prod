@@ -166,7 +166,7 @@ fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Erro
         .to_string();
 
     Ok(Credentials {
-        username: username,
+        username,
         password: Secret::new(password),
     })
 }
@@ -182,7 +182,7 @@ async fn validate_credentials(
     );
 
     if let Some((stored_user_id, stored_password_hash)) =
-        get_stored_credentials(&credentials.username, &pool)
+        get_stored_credentials(&credentials.username, pool)
             .await
             .map_err(PublishError::UnexpectedError)?
     {
@@ -208,7 +208,7 @@ fn verify_password_hash(
     expected_password_hash: Secret<String>,
     password_candidate: Secret<String>,
 ) -> Result<(), PublishError> {
-    let expected_password_hash = PasswordHash::new(&expected_password_hash.expose_secret())
+    let expected_password_hash = PasswordHash::new(expected_password_hash.expose_secret())
         .context("Failed to parse hash in PHC string format")
         .map_err(PublishError::UnexpectedError)?;
 
