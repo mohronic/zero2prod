@@ -1,4 +1,5 @@
 #![allow(clippy::toplevel_ref_arg)]
+pub mod authentication;
 pub mod configuration;
 pub mod domain;
 pub mod email_client;
