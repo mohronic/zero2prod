@@ -1,5 +1,3 @@
-use std::f32::consts::E;
-
 use actix_web::{http::header::ContentType, web, HttpResponse};
 use hmac::{Hmac, Mac};
 use secrecy::ExposeSecret;
