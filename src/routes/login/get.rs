@@ -12,9 +12,8 @@ pub async fn login_form(request: HttpRequest) -> HttpResponse {
         }
     };
 
-    HttpResponse::Ok()
+    let mut response = HttpResponse::Ok()
         .content_type(ContentType::html())
-        .cookie(Cookie::build("_flash", "").max_age(Duration::ZERO).finish())
         .body(format!(
             r#"
             <!DOCTYPE html>
@@ -39,5 +38,9 @@ pub async fn login_form(request: HttpRequest) -> HttpResponse {
                 </body>
             </html>
             "#
-        ))
+        ));
+
+    response.add_removal_cookie(&Cookie::new("_flash", "")).unwrap();
+
+    response
 }
