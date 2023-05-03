@@ -1,5 +1,3 @@
-use actix_web::HttpResponse;
+mod dashboard;
 
-pub async fn admin_dashboard() -> HttpResponse {
-    HttpResponse::Ok().finish()
-}
+pub use dashboard::admin_dashboard;
