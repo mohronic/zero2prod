@@ -71,13 +71,28 @@ impl TestApp {
         ConfirmationLinks { html, plain_text }
     }
 
-    pub async fn post_newsletters(&self, body: serde_json::Value) -> reqwest::Response {
+    pub async fn post_newsletters<Body>(&self, body: Body) -> reqwest::Response
+    where
+        Body: serde::Serialize,
+    {
         self.api_client
             .post(&format!("{}/admin/newsletters", &self.address))
             .form(&body)
             .send()
             .await
             .expect("Failed to execute request.")
+    }
+
+    pub async fn get_publish_newsletter(&self) -> reqwest::Response {
+        self.api_client
+            .get(&format!("{}/admin/newsletters", &self.address))
+            .send()
+            .await
+            .expect("Failed to execute request.")
+    }
+
+    pub async fn get_publish_newsletter_html(&self) -> String {
+        self.get_publish_newsletter().await.text().await.unwrap()
     }
 
     pub async fn post_login<Body>(&self, body: &Body) -> reqwest::Response
@@ -223,6 +238,14 @@ impl TestUser {
             username: Uuid::new_v4().to_string(),
             password: Uuid::new_v4().to_string(),
         }
+    }
+
+    pub async fn login(&self, app: &TestApp) {
+        app.post_login(&serde_json::json!({
+            "username": &self.username,
+            "password": &self.password
+        }))
+        .await;
     }
 
     async fn store(&self, pool: &PgPool) {
