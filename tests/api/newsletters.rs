@@ -27,7 +27,8 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
     let newsletter_request_body = serde_json::json!({
         "title": "Newsletter title",
         "text": "Newsletter body as plain text",
-        "html": "<p>Newsletter body as html</p>"
+        "html": "<p>Newsletter body as html</p>",
+        "idempotency_key": uuid::Uuid::new_v4().to_string()
     });
 
     let response = app.post_newsletters(newsletter_request_body).await;
@@ -60,7 +61,8 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
     let newsletter_request_body = serde_json::json!({
         "title": "Newsletter title",
         "text": "Newsletter body as plain text",
-        "html": "<p>Newsletter body as html</p>"
+        "html": "<p>Newsletter body as html</p>",
+        "idempotency_key": uuid::Uuid::new_v4().to_string()
     });
 
     let response = app.post_newsletters(newsletter_request_body).await;
@@ -86,13 +88,15 @@ async fn newsletters_return_400_for_invalid_data() {
         (
             serde_json::json!({
                 "text": "Newsletter body as plain text",
-                "html": "<p>Newsletter body as html</p>"
+                "html": "<p>Newsletter body as html</p>",
+                "idempotency_key": uuid::Uuid::new_v4().to_string()
             }),
             "missing title",
         ),
         (
             serde_json::json!({
-                "title": "Newsletter title"
+                "title": "Newsletter title",
+                "idempotency_key": uuid::Uuid::new_v4().to_string()
             }),
             "missing content",
         ),
@@ -117,7 +121,8 @@ async fn must_be_logged_in_to_publish_newsletter() {
     let newsletter_request_body = serde_json::json!({
         "title": "Newsletter title",
         "text": "Newsletter body as plain text",
-        "html": "<p>Newsletter body as html</p>"
+        "html": "<p>Newsletter body as html</p>",
+        "idempotency_key": uuid::Uuid::new_v4().to_string()
     });
 
     let response = app.post_newsletters(newsletter_request_body).await;
