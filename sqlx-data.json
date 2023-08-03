@@ -87,23 +87,88 @@
     },
     "query": "\n        UPDATE idempotency\n        SET\n            response_status_code = $3,\n            response_headers = $4,\n            response_body = $5\n        WHERE\n            user_id = $1 AND\n            idempotency_key = $2\n        "
   },
-  "7b57e2776a245ba1602f638121550485e2219a6ccaaa62b5ec3e4683e33a3b5f": {
+  "43116d4e670155129aa69a7563ddc3f7d01ef3689bb8de9ee1757b401ad95b46": {
     "describe": {
       "columns": [
         {
-          "name": "email",
+          "name": "title",
           "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "text_content",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "html_content",
+          "ordinal": 2,
           "type_info": "Text"
         }
       ],
       "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT title, text_content, html_content\n        FROM newsletter_issues\n        WHERE newsletter_issue_id = $1\n        "
+  },
+  "4f4da40d16442b792f339b08c48506299ab542c0d4cf212bdc5a95386da6bc82": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO newsletter_delivery_queue (\n            newsletter_issue_id,\n            subscriber_email\n        )\n        SELECT $1, email\n        FROM subscriptions\n        WHERE status = 'confirmed'\n        "
+  },
+  "5b4b879adee431b204c39704243f0e636003609e9aa06f3a76552d624c1b7632": {
+    "describe": {
+      "columns": [
+        {
+          "name": "newsletter_issue_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "subscriber_email",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
         false
       ],
       "parameters": {
         "Left": []
       }
     },
-    "query": "\n        SELECT email\n        FROM subscriptions\n        WHERE status = 'confirmed'\n        "
+    "query": "\n        SELECT newsletter_issue_id, subscriber_email\n        FROM newsletter_delivery_queue\n        FOR UPDATE\n        SKIP LOCKED\n        LIMIT 1\n        "
+  },
+  "794c0ce1ab5e766961132366163df7a7183ae7985228bf585700250deb38b726": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO newsletter_issues (\n            newsletter_issue_id,\n            title,\n            text_content,\n            html_content,\n            published_at\n        )\n        VALUES ($1, $2, $3, $4, now())\n        "
   },
   "8331e19e367a63b0c2112d1d8c048dd1a5f0eaa49d265d407a6ffd9469f127ce": {
     "describe": {
@@ -231,6 +296,19 @@
       }
     },
     "query": "UPDATE subscriptions SET status='confirmed' WHERE id = $1"
+  },
+  "e15767475a6c4bae5b349540a25246ca5aab6236e327fcbc8b10b8e474c0bba0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM newsletter_delivery_queue\n        WHERE\n            newsletter_issue_id = $1 AND\n            subscriber_email = $2\n        "
   },
   "f835e8ebdcd687acf7fcf845127617860abd3d7a806a900aa6d608c993dabb0b": {
     "describe": {
